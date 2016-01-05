@@ -1,0 +1,26 @@
+{
+  "name": "zoidtypes",
+  "version": "0.0.0",
+  "description": "Types for Zoidberg",
+  "main": "lib/zoidtypes.js",
+  "scripts": {
+    "test": "tap 'test/**/*.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jkrems/zoidtypes.git"
+  },
+  "keywords": [
+    "zoidberg",
+    "types"
+  ],
+  "author": "Jan Krems <jan.krems@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jkrems/zoidtypes/issues"
+  },
+  "homepage": "https://github.com/jkrems/zoidtypes#readme",
+  "devDependencies": {
+    "tap": "^5.0.0"
+  }
+}

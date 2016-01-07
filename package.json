@@ -5,7 +5,8 @@
   "main": "lib/zoidtypes.js",
   "scripts": {
     "pretest": "tsc --module commonjs --target ES5 --outDir lib src/*.ts",
-    "test": "tap 'test/**/*.js'"
+    "test": "tap 'test/**/*.js'",
+    "posttest": "nlm release"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,11 @@
   },
   "homepage": "https://github.com/jkrems/zoidtypes#readme",
   "devDependencies": {
+    "nlm": "^2.0.2",
     "tap": "^5.0.0",
     "typescript": "^1.7.5"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   }
 }

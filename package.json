@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "tsc --module commonjs --target ES5 --outDir lib src/*.ts",
     "test": "tap 'test/**/*.js'",
-    "posttest": "nlm release"
+    "posttest": "nlm verify"
   },
   "repository": {
     "type": "git",

@@ -4,6 +4,7 @@
   "description": "Types for Zoidberg",
   "main": "lib/zoidtypes.js",
   "scripts": {
+    "pretest": "tsc --module commonjs --target ES5 --outDir lib src/*.ts",
     "test": "tap 'test/**/*.js'"
   },
   "repository": {
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/jkrems/zoidtypes#readme",
   "devDependencies": {
-    "tap": "^5.0.0"
+    "tap": "^5.0.0",
+    "typescript": "^1.7.5"
   }
 }

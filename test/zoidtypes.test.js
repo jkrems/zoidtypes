@@ -1,7 +1,10 @@
 'use strict';
-var test = require('tap').test;
+const test = require('tap').test;
 
-var Types = require('../');
+const Types = require('../');
+
+const createScope = Types.createScope;
+const seal = Types.seal;
 
 test('Unify terminal and variable', t => {
   const scope = Types.createScope();
@@ -92,7 +95,7 @@ test('Nested call of unknown function', t => {
   const Int32 = scope.registerTerminal('Int32');
 
   const T = Types.createVariable('T');
-  const Id = scope.createFunctionType([T], T).seal();
+  const Id = seal(scope.createFunctionType([T], T));
 
   const Add = Types.createVariable('add');
 
@@ -127,7 +130,7 @@ test('Nested call of unknown function', t => {
 test('Function, two calls of identity', t => {
   const scope = Types.createScope();
   const a = Types.createVariable('a');
-  const Id = scope.createFunctionType([a], a).seal();
+  const Id = seal(scope.createFunctionType([a], a));
 
   const Int32 = scope.registerTerminal('Int32');
   const Float64 = scope.registerTerminal('Float64');
@@ -142,4 +145,85 @@ test('Function, two calls of identity', t => {
   t.equal(floatResult.actual, Float64);
 
   t.end();
+});
+
+test('Overloading', t => {
+  const scope = Types.createScope();
+
+  const Int32 = scope.registerTerminal('Int32');
+  const Float64 = scope.registerTerminal('Float64');
+  const Str = scope.registerTerminal('String');
+
+  t.test('add', t => {
+    // 1. Add for ints and floats
+    //    add(x: Int32, y: Int32): Int32
+    //    add(x: Float32, y: Float32): Float32
+    const addi = seal(scope.createFunctionType([Int32, Int32], Int32));
+    const addf = seal(scope.createFunctionType([Float64, Float64], Float64));
+
+    const add = scope.createUnion([addi, addf]);
+
+    t.throws(() =>
+      Types.unifyCall(add,
+        [Types.createVariable(), Types.createVariable()],
+        Types.createVariable()));
+
+    const intResult = Types.createVariable();
+    Types.unifyCall(add, [Types.createVariable(), Int32], intResult);
+    t.equal(intResult.actual, Int32);
+
+    const floatResult = Types.createVariable();
+    Types.unifyCall(add, [Float64, Float64], floatResult);
+    t.equal(floatResult.actual, Float64);
+
+    t.end();
+  });
+
+  t.test('length', t => {
+    // 2. Length for Arrays and Lists and generic
+    //    template<T> length(c: T): Int32
+    //    template<U> length(c: Array<T>): Int32
+    //    template<U> length(c: List<T>): Int32
+    const Arr = scope.registerTemplate('Array', ['T']);
+    const List = scope.registerTemplate('List', ['T']);
+    const lenGeneric = seal(scope.createFunctionType(
+      [Types.createVariable()], Str));
+    const lenArr = seal(scope.createFunctionType(
+      [Arr.create([Types.createVariable()])], Int32));
+    const lenList = seal(scope.createFunctionType(
+      [List.create([Types.createVariable()])], Float64));
+
+    const len = scope.createUnion([lenGeneric, lenArr, lenList]);
+
+    // It uses the best fit (~least generic)
+    const arrResult = Types.createVariable();
+    Types.unifyCall(len, [Arr.create([Int32])], arrResult);
+    t.equal(arrResult.actual, Int32);
+
+    const strResult = Types.createVariable();
+    Types.unifyCall(len, [Str], strResult);
+    t.equal(strResult.actual, Str);
+
+    t.end();
+  });
+
+  t.end();
+});
+
+test('Generic generics', { skip: true }, t => {
+  /*
+   * template<Wrap, T, U>
+   * map(f: (T) => U, wrapped: Wrap<T>) {
+   *   // Implementation unknown
+   * }
+   *
+   * template<Wrap>
+   * doubleIfPositive(wrapped: Wrap<Int32>) {
+   *   return map(wrapped, x => {
+   *     return x > 0 ? x * 2 : x;
+   *   });
+   * }
+   */
+  // const scope = Types.createScope();
+  // const a = Types.createVariable('Wrap');
 });
